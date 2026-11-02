@@ -23,7 +23,7 @@ public interface UsuarioRepository extends JpaRepository<Usuario, Long> {
 
     long countByRol(Rol rol);
 
-    /** Busca por coincidencia parcial en usuario, nombre o correo; el patron nunca es nulo ("%" = todos). */
+    /** Busca por coincidencia parcial en usuario, nombre o correo; el patrón nunca es nulo ("%" = todos). */
     @Query("""
             select u from Usuario u
             where (lower(u.username) like :patron escape '\\'

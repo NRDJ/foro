@@ -103,7 +103,7 @@ public class TemaServiceImpl implements TemaService {
 
     private Categoria buscarCategoria(Long id) {
         return categoriaRepository.findById(id)
-                .orElseThrow(() -> new RecursoNoEncontradoException("No existe la categoria con id " + id));
+                .orElseThrow(() -> new RecursoNoEncontradoException("No existe la categoría con id " + id));
     }
 
     private String patronLike(String texto) {

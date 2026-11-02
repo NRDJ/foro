@@ -30,7 +30,7 @@ public class SecurityConfig {
                 .cors(Customizer.withDefaults())
                 .sessionManagement(s -> s.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
-                        // Cualquiera puede buscar y leer; para publicar hay que iniciar sesion.
+                        // Cualquiera puede buscar y leer; para publicar hay que iniciar sesión.
                         .requestMatchers(HttpMethod.GET, "/api/categorias/**", "/api/temas/**", "/api/comentarios/**").permitAll()
                         .requestMatchers("/actuator/health").permitAll()
                         .requestMatchers("/api/categorias/**").hasRole("ADMIN")

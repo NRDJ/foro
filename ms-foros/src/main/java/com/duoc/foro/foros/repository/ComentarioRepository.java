@@ -27,7 +27,7 @@ public interface ComentarioRepository extends JpaRepository<Comentario, Long> {
 
     long countByTemaId(Long temaId);
 
-    /** Una sola consulta para los totales de toda una pagina de temas. */
+    /** Una sola consulta para los totales de toda una página de temas. */
     @Query("""
             select c.tema.id as temaId, count(c) as total
             from Comentario c

@@ -20,7 +20,7 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExcep
 
 import java.util.List;
 
-/** Traduce toda excepcion a una respuesta JSON con el mismo formato. */
+/** Traduce toda excepción a una respuesta JSON con el mismo formato. */
 @Slf4j
 @RestControllerAdvice
 public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
@@ -51,18 +51,18 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         return respuesta(HttpStatus.FORBIDDEN, ex.getMessage(), req.getRequestURI(), List.of());
     }
 
-    /** Respaldo ante dos solicitudes simultaneas que pasan la validacion previa de duplicados. */
+    /** Respaldo ante dos solicitudes simultáneas que pasan la validación previa de duplicados. */
     @ExceptionHandler(DataIntegrityViolationException.class)
     public ResponseEntity<ErrorResponse> integridad(DataIntegrityViolationException ex, HttpServletRequest req) {
-        log.warn("Violacion de integridad en {}: {}", req.getRequestURI(), ex.getMostSpecificCause().getMessage());
-        return respuesta(HttpStatus.CONFLICT, "La operacion viola una restriccion de la base de datos",
+        log.warn("Violación de integridad en {}: {}", req.getRequestURI(), ex.getMostSpecificCause().getMessage());
+        return respuesta(HttpStatus.CONFLICT, "La operación viola una restricción de la base de datos",
                 req.getRequestURI(), List.of());
     }
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorResponse> general(Exception ex, HttpServletRequest req) {
         log.error("Error no controlado en {}", req.getRequestURI(), ex);
-        return respuesta(HttpStatus.INTERNAL_SERVER_ERROR, "Ocurrio un error interno", req.getRequestURI(), List.of());
+        return respuesta(HttpStatus.INTERNAL_SERVER_ERROR, "Ocurrió un error interno", req.getRequestURI(), List.of());
     }
 
     @Override
@@ -72,7 +72,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
                 .map(e -> e.getField() + ": " + e.getDefaultMessage())
                 .sorted()
                 .toList();
-        return new ResponseEntity<>(ErrorResponse.de(status.value(), "Bad Request", "Los datos enviados no son validos",
+        return new ResponseEntity<>(ErrorResponse.de(status.value(), "Bad Request", "Los datos enviados no son válidos",
                 ruta(request), detalles), headers, status);
     }
 
@@ -81,7 +81,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
                                                                             HttpHeaders headers, HttpStatusCode status,
                                                                             WebRequest request) {
         List<String> detalles = ex.getAllErrors().stream().map(e -> e.getDefaultMessage()).sorted().toList();
-        return new ResponseEntity<>(ErrorResponse.de(status.value(), "Bad Request", "Los parametros no son validos",
+        return new ResponseEntity<>(ErrorResponse.de(status.value(), "Bad Request", "Los parametros no son válidos",
                 ruta(request), detalles), headers, status);
     }
 
@@ -89,7 +89,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     protected ResponseEntity<Object> handleHttpMessageNotReadable(HttpMessageNotReadableException ex, HttpHeaders headers,
                                                                   HttpStatusCode status, WebRequest request) {
         return new ResponseEntity<>(ErrorResponse.de(status.value(), "Bad Request",
-                "El cuerpo de la solicitud no es un JSON valido o tiene valores no permitidos",
+                "El cuerpo de la solicitud no es un JSON válido o tiene valores no permitidos",
                 ruta(request), List.of()), headers, status);
     }
 

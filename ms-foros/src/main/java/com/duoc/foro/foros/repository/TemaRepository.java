@@ -20,8 +20,8 @@ public interface TemaRepository extends JpaRepository<Tema, Long> {
     Optional<Tema> findWithCategoriaById(Long id);
 
     /**
-     * Busqueda combinable por texto (titulo o contenido), categoria y autor.
-     * El patron nunca es nulo ("%" = todos); los filtros nulos no se aplican.
+     * Búsqueda combinable por texto (título o contenido), categoría y autor.
+     * El patrón nunca es nulo ("%" = todos); los filtros nulos no se aplican.
      */
     @EntityGraph(attributePaths = "categoria")
     @Query("""

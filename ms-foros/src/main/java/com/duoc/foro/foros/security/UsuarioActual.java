@@ -14,10 +14,10 @@ public record UsuarioActual(Long id, String username, String rol) {
         return "ADMIN".equals(rol);
     }
 
-    /** Un usuario comun solo gestiona lo que publico; un administrador gestiona todo. */
+    /** Un usuario común solo gestiona lo que publicó; un administrador gestiona todo. */
     public void exigirAutorOAdmin(Long autorId) {
         if (!esAdmin() && !id.equals(autorId)) {
-            throw new AccessDeniedException("Solo el autor o un administrador puede realizar esta operacion");
+            throw new AccessDeniedException("Solo el autor o un administrador puede realizar esta operación");
         }
     }
 }
