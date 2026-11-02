@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Agregador: permite compilar y probar ambos microservicios con un solo comando.
+     Cada microservicio sigue siendo independiente (tiene su propio pom y se ejecuta por separado). -->
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <groupId>com.duoc.foro</groupId>
+    <artifactId>foro-en-linea</artifactId>
+    <version>1.0.0</version>
+    <packaging>pom</packaging>
+    <name>Sistema de Foros en Linea</name>
+
+    <modules>
+        <module>ms-usuarios</module>
+        <module>ms-foros</module>
+    </modules>
+</project>
