@@ -91,7 +91,7 @@ class UsuariosIntegrationTest {
         mvc.perform(post("/api/auth/registro").contentType(MediaType.APPLICATION_JSON).content(
                         "{\"username\":\"largo\",\"email\":\"largo@foro.cl\",\"password\":\"" + clave + "\",\"nombre\":\"L\"}"))
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.mensaje").value("La contrasena es demasiado larga"));
+                .andExpect(jsonPath("$.mensaje").value("La contraseña es demasiado larga"));
     }
 
     @Test
@@ -99,7 +99,7 @@ class UsuariosIntegrationTest {
         mvc.perform(post("/api/auth/login").contentType(MediaType.APPLICATION_JSON)
                         .content("{\"username\":\"admin\",\"password\":\"incorrecta\"}"))
                 .andExpect(status().isUnauthorized())
-                .andExpect(jsonPath("$.mensaje").value("Usuario o contrasena incorrectos"));
+                .andExpect(jsonPath("$.mensaje").value("Usuario o contraseña incorrectos"));
     }
 
     @Test

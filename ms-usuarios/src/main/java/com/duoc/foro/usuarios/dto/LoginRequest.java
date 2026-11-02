@@ -6,6 +6,6 @@ public record LoginRequest(
         @NotBlank(message = "El nombre de usuario es obligatorio")
         String username,
 
-        @NotBlank(message = "La contrasena es obligatoria")
+        @NotBlank(message = "La contraseña es obligatoria")
         String password) {
 }

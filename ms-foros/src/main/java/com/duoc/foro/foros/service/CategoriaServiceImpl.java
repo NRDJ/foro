@@ -39,13 +39,13 @@ public class CategoriaServiceImpl implements CategoriaService {
     public CategoriaResponse crear(CategoriaRequest r) {
         String nombre = r.nombre().trim();
         if (repository.existsByNombreIgnoreCase(nombre)) {
-            throw new ConflictoException("Ya existe una categoria con ese nombre");
+            throw new ConflictoException("Ya existe una categoría con ese nombre");
         }
         Categoria categoria = new Categoria();
         categoria.setNombre(nombre);
         categoria.setDescripcion(r.descripcion().trim());
         Categoria guardada = repository.saveAndFlush(categoria);
-        log.info("Categoria creada: {}", guardada.getNombre());
+        log.info("Categoría creada: {}", guardada.getNombre());
         return new CategoriaResponse(guardada.getId(), guardada.getNombre(), guardada.getDescripcion(), 0);
     }
 
@@ -55,12 +55,12 @@ public class CategoriaServiceImpl implements CategoriaService {
         Categoria categoria = repository.findById(id).orElseThrow(() -> noExiste(id));
         String nombre = r.nombre().trim();
         if (repository.existsByNombreIgnoreCaseAndIdNot(nombre, id)) {
-            throw new ConflictoException("Ya existe una categoria con ese nombre");
+            throw new ConflictoException("Ya existe una categoría con ese nombre");
         }
         categoria.setNombre(nombre);
         categoria.setDescripcion(r.descripcion().trim());
         repository.saveAndFlush(categoria);
-        log.info("Categoria {} actualizada", id);
+        log.info("Categoría {} actualizada", id);
         return obtener(id);
     }
 
@@ -69,13 +69,13 @@ public class CategoriaServiceImpl implements CategoriaService {
     public void eliminar(Long id) {
         Categoria categoria = repository.findById(id).orElseThrow(() -> noExiste(id));
         if (temaRepository.existsByCategoriaId(id)) {
-            throw new ConflictoException("No se puede eliminar una categoria que tiene temas");
+            throw new ConflictoException("No se puede eliminar una categoría que tiene temas");
         }
         repository.delete(categoria);
-        log.info("Categoria {} eliminada", id);
+        log.info("Categoría {} eliminada", id);
     }
 
     private RecursoNoEncontradoException noExiste(Long id) {
-        return new RecursoNoEncontradoException("No existe la categoria con id " + id);
+        return new RecursoNoEncontradoException("No existe la categoría con id " + id);
     }
 }

@@ -38,7 +38,7 @@ public class UsuarioServiceImpl implements UsuarioService {
     @Override
     @Transactional
     public UsuarioResponse registrar(RegistroRequest r) {
-        // El registro publico siempre crea usuarios comunes: un ADMIN solo lo puede crear otro ADMIN.
+        // El registro público siempre crea usuarios comunes: un ADMIN solo lo puede crear otro ADMIN.
         return guardarNuevo(r.username(), r.email(), r.password(), r.nombre(), Rol.USUARIO);
     }
 
@@ -48,10 +48,10 @@ public class UsuarioServiceImpl implements UsuarioService {
         Usuario usuario = repository.findByUsername(normalizar(r.username()))
                 .filter(u -> passwordEncoder.matches(r.password(), u.getPasswordHash()))
                 .orElseThrow(() -> {
-                    log.warn("Inicio de sesion fallido para '{}'", r.username());
+                    log.warn("Inicio de sesión fallido para '{}'", r.username());
                     return new CredencialesInvalidasException();
                 });
-        log.info("Inicio de sesion correcto: {} ({})", usuario.getUsername(), usuario.getRol());
+        log.info("Inicio de sesión correcto: {} ({})", usuario.getUsername(), usuario.getRol());
         return new LoginResponse(tokenService.generar(usuario), "Bearer", tokenService.segundosDeVigencia(),
                 UsuarioResponse.desde(usuario));
     }
@@ -91,7 +91,7 @@ public class UsuarioServiceImpl implements UsuarioService {
 
         String email = normalizar(r.email());
         if (repository.existsByEmailAndIdNot(email, id)) {
-            throw new ConflictoException("El correo ya esta registrado");
+            throw new ConflictoException("El correo ya está registrado");
         }
         usuario.setEmail(email);
         usuario.setNombre(r.nombre().trim());
@@ -117,10 +117,10 @@ public class UsuarioServiceImpl implements UsuarioService {
         String usernameNormalizado = normalizar(username);
         String emailNormalizado = normalizar(email);
         if (repository.existsByUsername(usernameNormalizado)) {
-            throw new ConflictoException("El nombre de usuario ya esta registrado");
+            throw new ConflictoException("El nombre de usuario ya está registrado");
         }
         if (repository.existsByEmail(emailNormalizado)) {
-            throw new ConflictoException("El correo ya esta registrado");
+            throw new ConflictoException("El correo ya está registrado");
         }
 
         Usuario usuario = new Usuario();
@@ -138,7 +138,7 @@ public class UsuarioServiceImpl implements UsuarioService {
     /** BCrypt admite hasta 72 bytes; una clave con acentos o emojis puede superarlos con menos de 72 caracteres. */
     private String codificarClave(String clave) {
         if (clave.getBytes(StandardCharsets.UTF_8).length > 72) {
-            throw new SolicitudInvalidaException("La contrasena es demasiado larga");
+            throw new SolicitudInvalidaException("La contraseña es demasiado larga");
         }
         return passwordEncoder.encode(clave);
     }
@@ -154,10 +154,10 @@ public class UsuarioServiceImpl implements UsuarioService {
         }
     }
 
-    /** Evita que el sistema quede sin ningun administrador. */
+    /** Evita que el sistema quede sin ningún administrador. */
     private void exigirOtroAdmin(Usuario usuario) {
         if (usuario.getRol() == Rol.ADMIN && repository.countByRol(Rol.ADMIN) <= 1) {
-            throw new ConflictoException("No se puede quitar al unico administrador del sistema");
+            throw new ConflictoException("No se puede quitar al único administrador del sistema");
         }
     }
 

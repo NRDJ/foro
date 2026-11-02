@@ -10,16 +10,16 @@ import jakarta.validation.constraints.Size;
 public record UsuarioCreateRequest(
         @NotBlank(message = "El nombre de usuario es obligatorio")
         @Pattern(regexp = "^[a-zA-Z0-9._-]{3,50}$",
-                message = "El nombre de usuario debe tener de 3 a 50 caracteres: letras, numeros, punto, guion o guion bajo")
+                message = "El nombre de usuario debe tener de 3 a 50 caracteres: letras, números, punto, guion o guion bajo")
         String username,
 
         @NotBlank(message = "El correo es obligatorio")
-        @Email(message = "El correo no tiene un formato valido")
+        @Email(message = "El correo no tiene un formato válido")
         @Size(max = 120, message = "El correo no puede superar los 120 caracteres")
         String email,
 
-        @NotBlank(message = "La contrasena es obligatoria")
-        @Size(min = 8, max = 72, message = "La contrasena debe tener entre 8 y 72 caracteres")
+        @NotBlank(message = "La contraseña es obligatoria")
+        @Size(min = 8, max = 72, message = "La contraseña debe tener entre 8 y 72 caracteres")
         String password,
 
         @NotBlank(message = "El nombre es obligatorio")

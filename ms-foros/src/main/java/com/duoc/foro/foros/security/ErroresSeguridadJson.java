@@ -26,12 +26,12 @@ public class ErroresSeguridadJson implements AuthenticationEntryPoint, AccessDen
 
     @Override
     public void commence(HttpServletRequest request, HttpServletResponse response, AuthenticationException ex) throws IOException {
-        escribir(response, request, HttpStatus.UNAUTHORIZED, "Debe iniciar sesion con un token valido");
+        escribir(response, request, HttpStatus.UNAUTHORIZED, "Debe iniciar sesión con un token válido");
     }
 
     @Override
     public void handle(HttpServletRequest request, HttpServletResponse response, AccessDeniedException ex) throws IOException {
-        escribir(response, request, HttpStatus.FORBIDDEN, "Su rol no tiene permiso para esta operacion");
+        escribir(response, request, HttpStatus.FORBIDDEN, "Su rol no tiene permiso para esta operación");
     }
 
     private void escribir(HttpServletResponse response, HttpServletRequest request, HttpStatus status, String mensaje) throws IOException {
