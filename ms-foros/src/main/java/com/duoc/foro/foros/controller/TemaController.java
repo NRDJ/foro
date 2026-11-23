@@ -2,6 +2,7 @@ package com.duoc.foro.foros.controller;
 
 import com.duoc.foro.foros.dto.ComentarioRequest;
 import com.duoc.foro.foros.dto.ComentarioResponse;
+import com.duoc.foro.foros.dto.EstadoRequest;
 import com.duoc.foro.foros.dto.PaginaResponse;
 import com.duoc.foro.foros.dto.TemaDetalleResponse;
 import com.duoc.foro.foros.dto.TemaRequest;
@@ -19,6 +20,7 @@ import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -52,8 +54,8 @@ public class TemaController {
     }
 
     @GetMapping("/{id}")
-    public TemaDetalleResponse obtener(@PathVariable Long id) {
-        return temaService.obtenerDetalle(id);
+    public TemaDetalleResponse obtener(@PathVariable Long id, @AuthenticationPrincipal Jwt jwt) {
+        return temaService.obtenerDetalle(id, UsuarioActual.desdeOpcional(jwt));
     }
 
     @PostMapping
@@ -74,9 +76,16 @@ public class TemaController {
         temaService.eliminar(id, UsuarioActual.desde(jwt));
     }
 
+    /** Lo usa ms-moderacion para banear (BANEADO) o restaurar (VISIBLE) un tema. Solo ADMIN. */
+    @PatchMapping("/{id}/estado")
+    public TemaResponse cambiarEstado(@PathVariable Long id, @Valid @RequestBody EstadoRequest request,
+                                      @AuthenticationPrincipal Jwt jwt) {
+        return temaService.cambiarEstado(id, request.estado(), UsuarioActual.desde(jwt));
+    }
+
     @GetMapping("/{id}/comentarios")
-    public List<ComentarioResponse> listarComentarios(@PathVariable Long id) {
-        return comentarioService.listarPorTema(id);
+    public List<ComentarioResponse> listarComentarios(@PathVariable Long id, @AuthenticationPrincipal Jwt jwt) {
+        return comentarioService.listarPorTema(id, UsuarioActual.desdeOpcional(jwt));
     }
 
     @PostMapping("/{id}/comentarios")

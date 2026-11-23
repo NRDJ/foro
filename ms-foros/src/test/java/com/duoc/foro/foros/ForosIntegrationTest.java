@@ -27,6 +27,7 @@ import java.time.Instant;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -253,5 +254,72 @@ class ForosIntegrationTest {
         mvc.perform(get("/api/temas/abc"))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.status").value(400));
+    }
+
+    private void cambiarEstado(String ruta, String estado, String token, int esperado) throws Exception {
+        mvc.perform(patch(ruta).header(HttpHeaders.AUTHORIZATION, token)
+                        .contentType(MediaType.APPLICATION_JSON).content("{\"estado\":\"" + estado + "\"}"))
+                .andExpect(status().is(esperado));
+    }
+
+    @Test
+    void soloUnAdminCambiaElEstadoDelContenido() throws Exception {
+        long tema = publicar("Spam", camila);
+        cambiarEstado("/api/temas/" + tema + "/estado", "BANEADO", camila, 403);
+        mvc.perform(patch("/api/temas/" + tema + "/estado").contentType(MediaType.APPLICATION_JSON)
+                .content("{\"estado\":\"BANEADO\"}")).andExpect(status().isUnauthorized());
+        cambiarEstado("/api/temas/" + tema + "/estado", "OTRO", admin, 400);
+        cambiarEstado("/api/temas/999999/estado", "BANEADO", admin, 404);
+        mvc.perform(patch("/api/temas/" + tema + "/estado").header(HttpHeaders.AUTHORIZATION, admin)
+                        .contentType(MediaType.APPLICATION_JSON).content("{\"estado\":\"BANEADO\"}"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.estado").value("BANEADO"));
+    }
+
+    @Test
+    void temaBaneadoSeOcultaParaTodosMenosElAdmin() throws Exception {
+        long visible = publicar("Visible", camila);
+        long baneado = publicar("Baneado", camila);
+        comentar(baneado, diego);
+        cambiarEstado("/api/temas/" + baneado + "/estado", "BANEADO", admin, 200);
+
+        mvc.perform(get("/api/temas"))
+                .andExpect(jsonPath("$.totalElementos").value(1))
+                .andExpect(jsonPath("$.contenido[0].id").value(visible));
+        mvc.perform(get("/api/categorias/" + categoriaId)).andExpect(jsonPath("$.totalTemas").value(1));
+        mvc.perform(get("/api/temas/" + baneado)).andExpect(status().isNotFound());
+        mvc.perform(get("/api/temas/" + baneado).header(HttpHeaders.AUTHORIZATION, camila)).andExpect(status().isNotFound());
+        mvc.perform(get("/api/temas/" + baneado + "/comentarios")).andExpect(status().isNotFound());
+        mvc.perform(put("/api/temas/" + baneado).header(HttpHeaders.AUTHORIZATION, camila)
+                .contentType(MediaType.APPLICATION_JSON).content(json("Editado"))).andExpect(status().isNotFound());
+        mvc.perform(post("/api/temas/" + baneado + "/comentarios").header(HttpHeaders.AUTHORIZATION, diego)
+                .contentType(MediaType.APPLICATION_JSON).content("{\"contenido\":\"X\"}")).andExpect(status().isNotFound());
+        mvc.perform(get("/api/temas/" + baneado).header(HttpHeaders.AUTHORIZATION, admin))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.tema.estado").value("BANEADO"));
+
+        cambiarEstado("/api/temas/" + baneado + "/estado", "VISIBLE", admin, 200);
+        mvc.perform(get("/api/temas")).andExpect(jsonPath("$.totalElementos").value(2));
+    }
+
+    @Test
+    void comentarioBaneadoSeOcultaYNoCuenta() throws Exception {
+        long tema = publicar("Tema", camila);
+        comentar(tema, camila);
+        long malo = comentar(tema, diego);
+        cambiarEstado("/api/comentarios/" + malo + "/estado", "BANEADO", admin, 200);
+
+        mvc.perform(get("/api/temas/" + tema))
+                .andExpect(jsonPath("$.tema.totalComentarios").value(1))
+                .andExpect(jsonPath("$.comentarios.length()").value(1));
+        mvc.perform(get("/api/temas").param("q", "Tema"))
+                .andExpect(jsonPath("$.contenido[0].totalComentarios").value(1));
+        mvc.perform(get("/api/comentarios/" + malo)).andExpect(status().isNotFound());
+        mvc.perform(put("/api/comentarios/" + malo).header(HttpHeaders.AUTHORIZATION, diego)
+                .contentType(MediaType.APPLICATION_JSON).content("{\"contenido\":\"X\"}")).andExpect(status().isNotFound());
+        mvc.perform(get("/api/temas/" + tema + "/comentarios").header(HttpHeaders.AUTHORIZATION, admin))
+                .andExpect(jsonPath("$.length()").value(2));
+        mvc.perform(get("/api/comentarios/" + malo).header(HttpHeaders.AUTHORIZATION, admin))
+                .andExpect(jsonPath("$.estado").value("BANEADO"));
     }
 }

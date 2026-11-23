@@ -7,6 +7,8 @@ import com.duoc.foro.foros.dto.TemaRequest;
 import com.duoc.foro.foros.dto.TemaResponse;
 import com.duoc.foro.foros.exception.RecursoNoEncontradoException;
 import com.duoc.foro.foros.model.Categoria;
+import com.duoc.foro.foros.model.Comentario;
+import com.duoc.foro.foros.model.EstadoContenido;
 import com.duoc.foro.foros.model.Tema;
 import com.duoc.foro.foros.repository.CategoriaRepository;
 import com.duoc.foro.foros.repository.ComentarioRepository;
@@ -38,10 +40,11 @@ public class TemaServiceImpl implements TemaService {
     @Transactional(readOnly = true)
     public PaginaResponse<TemaResponse> buscar(String texto, Long categoriaId, Long autorId, int pagina, int tamano) {
         Sort orden = Sort.by(Sort.Order.desc("fechaCreacion"), Sort.Order.desc("id"));
-        Page<Tema> temas = repository.buscar(patronLike(texto), categoriaId, autorId, PageRequest.of(pagina, tamano, orden));
+        Page<Tema> temas = repository.buscar(patronLike(texto), categoriaId, autorId, EstadoContenido.VISIBLE,
+                PageRequest.of(pagina, tamano, orden));
 
         Map<Long, Long> totales = temas.isEmpty() ? Map.of()
-                : comentarioRepository.contarPorTemas(temas.map(Tema::getId).getContent()).stream()
+                : comentarioRepository.contarPorTemas(temas.map(Tema::getId).getContent(), EstadoContenido.VISIBLE).stream()
                 .collect(Collectors.toMap(ComentarioRepository.TotalPorTema::getTemaId, ComentarioRepository.TotalPorTema::getTotal));
 
         List<TemaResponse> contenido = temas.getContent().stream()
@@ -52,12 +55,15 @@ public class TemaServiceImpl implements TemaService {
 
     @Override
     @Transactional(readOnly = true)
-    public TemaDetalleResponse obtenerDetalle(Long id) {
-        Tema tema = buscarConCategoria(id);
-        List<ComentarioResponse> comentarios = comentarioRepository.listarPorTema(id).stream()
-                .map(ComentarioResponse::desde)
-                .toList();
-        return new TemaDetalleResponse(TemaResponse.desde(tema, comentarios.size()), comentarios);
+    public TemaDetalleResponse obtenerDetalle(Long id, UsuarioActual actual) {
+        boolean admin = actual != null && actual.esAdmin();
+        Tema tema = buscarAccesible(id, admin);
+        // Un administrador ve también los comentarios baneados, para poder revisarlos.
+        List<Comentario> comentarios = admin
+                ? comentarioRepository.listarPorTema(id)
+                : comentarioRepository.listarPorTemaYEstado(id, EstadoContenido.VISIBLE);
+        List<ComentarioResponse> respuesta = comentarios.stream().map(ComentarioResponse::desde).toList();
+        return new TemaDetalleResponse(TemaResponse.desde(tema, comentarioRepository.countByTemaIdAndEstado(id, EstadoContenido.VISIBLE)), respuesta);
     }
 
     @Override
@@ -77,27 +83,39 @@ public class TemaServiceImpl implements TemaService {
     @Override
     @Transactional
     public TemaResponse actualizar(Long id, TemaRequest r, UsuarioActual actual) {
-        Tema tema = buscarConCategoria(id);
+        Tema tema = buscarAccesible(id, actual.esAdmin());
         actual.exigirAutorOAdmin(tema.getAutorId());
         tema.setTitulo(r.titulo().trim());
         tema.setContenido(r.contenido().trim());
         tema.setCategoria(buscarCategoria(r.categoriaId()));
         Tema guardado = repository.saveAndFlush(tema);
         log.info("Tema {} actualizado por {}", id, actual.username());
-        return TemaResponse.desde(guardado, comentarioRepository.countByTemaId(id));
+        return TemaResponse.desde(guardado, comentarioRepository.countByTemaIdAndEstado(id, EstadoContenido.VISIBLE));
     }
 
     @Override
     @Transactional
     public void eliminar(Long id, UsuarioActual actual) {
-        Tema tema = buscarConCategoria(id);
+        Tema tema = buscarAccesible(id, actual.esAdmin());
         actual.exigirAutorOAdmin(tema.getAutorId());
         repository.delete(tema);
         log.info("Tema {} eliminado por {}", id, actual.username());
     }
 
-    private Tema buscarConCategoria(Long id) {
+    @Override
+    @Transactional
+    public TemaResponse cambiarEstado(Long id, EstadoContenido estado, UsuarioActual admin) {
+        Tema tema = buscarAccesible(id, true);
+        tema.setEstado(estado);
+        Tema guardado = repository.saveAndFlush(tema);
+        log.info("Tema {} marcado como {} por {}", id, estado, admin.username());
+        return TemaResponse.desde(guardado, comentarioRepository.countByTemaIdAndEstado(id, EstadoContenido.VISIBLE));
+    }
+
+    /** Un tema baneado no existe para el resto de los usuarios; solo un administrador lo sigue viendo. */
+    private Tema buscarAccesible(Long id, boolean admin) {
         return repository.findWithCategoriaById(id)
+                .filter(t -> admin || t.getEstado() == EstadoContenido.VISIBLE)
                 .orElseThrow(() -> new RecursoNoEncontradoException("No existe el tema con id " + id));
     }
 

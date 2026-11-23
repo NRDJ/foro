@@ -5,6 +5,7 @@ import com.duoc.foro.foros.dto.CategoriaResponse;
 import com.duoc.foro.foros.exception.ConflictoException;
 import com.duoc.foro.foros.exception.RecursoNoEncontradoException;
 import com.duoc.foro.foros.model.Categoria;
+import com.duoc.foro.foros.model.EstadoContenido;
 import com.duoc.foro.foros.repository.CategoriaRepository;
 import com.duoc.foro.foros.repository.TemaRepository;
 import lombok.RequiredArgsConstructor;
@@ -25,13 +26,13 @@ public class CategoriaServiceImpl implements CategoriaService {
     @Override
     @Transactional(readOnly = true)
     public List<CategoriaResponse> listar() {
-        return repository.listarConTotalDeTemas();
+        return repository.listarConTotalDeTemas(EstadoContenido.VISIBLE);
     }
 
     @Override
     @Transactional(readOnly = true)
     public CategoriaResponse obtener(Long id) {
-        return repository.obtenerConTotalDeTemas(id).orElseThrow(() -> noExiste(id));
+        return repository.obtenerConTotalDeTemas(id, EstadoContenido.VISIBLE).orElseThrow(() -> noExiste(id));
     }
 
     @Override
