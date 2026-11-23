@@ -4,6 +4,7 @@ import com.duoc.foro.foros.dto.ComentarioRequest;
 import com.duoc.foro.foros.dto.ComentarioResponse;
 import com.duoc.foro.foros.exception.RecursoNoEncontradoException;
 import com.duoc.foro.foros.model.Comentario;
+import com.duoc.foro.foros.model.EstadoContenido;
 import com.duoc.foro.foros.model.Tema;
 import com.duoc.foro.foros.repository.ComentarioRepository;
 import com.duoc.foro.foros.repository.TemaRepository;
@@ -25,15 +26,19 @@ public class ComentarioServiceImpl implements ComentarioService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<ComentarioResponse> listarPorTema(Long temaId) {
-        buscarTema(temaId);
-        return repository.listarPorTema(temaId).stream().map(ComentarioResponse::desde).toList();
+    public List<ComentarioResponse> listarPorTema(Long temaId, UsuarioActual actual) {
+        boolean admin = esAdmin(actual);
+        buscarTemaAccesible(temaId, admin);
+        List<Comentario> comentarios = admin
+                ? repository.listarPorTema(temaId)
+                : repository.listarPorTemaYEstado(temaId, EstadoContenido.VISIBLE);
+        return comentarios.stream().map(ComentarioResponse::desde).toList();
     }
 
     @Override
     @Transactional(readOnly = true)
-    public ComentarioResponse obtener(Long id) {
-        return ComentarioResponse.desde(buscar(id));
+    public ComentarioResponse obtener(Long id, UsuarioActual actual) {
+        return ComentarioResponse.desde(buscarAccesible(id, esAdmin(actual)));
     }
 
     @Override
@@ -41,7 +46,7 @@ public class ComentarioServiceImpl implements ComentarioService {
     public ComentarioResponse comentar(Long temaId, ComentarioRequest r, UsuarioActual autor) {
         Comentario comentario = new Comentario();
         comentario.setContenido(r.contenido().trim());
-        comentario.setTema(buscarTema(temaId));
+        comentario.setTema(buscarTemaAccesible(temaId, autor.esAdmin()));
         comentario.setAutorId(autor.id());
         comentario.setAutorUsername(autor.username());
         Comentario guardado = repository.saveAndFlush(comentario);
@@ -52,7 +57,7 @@ public class ComentarioServiceImpl implements ComentarioService {
     @Override
     @Transactional
     public ComentarioResponse actualizar(Long id, ComentarioRequest r, UsuarioActual actual) {
-        Comentario comentario = buscar(id);
+        Comentario comentario = buscarAccesible(id, actual.esAdmin());
         actual.exigirAutorOAdmin(comentario.getAutorId());
         comentario.setContenido(r.contenido().trim());
         Comentario guardado = repository.saveAndFlush(comentario);
@@ -63,19 +68,36 @@ public class ComentarioServiceImpl implements ComentarioService {
     @Override
     @Transactional
     public void eliminar(Long id, UsuarioActual actual) {
-        Comentario comentario = buscar(id);
+        Comentario comentario = buscarAccesible(id, actual.esAdmin());
         actual.exigirAutorOAdmin(comentario.getAutorId());
         repository.delete(comentario);
         log.info("Comentario {} eliminado por {}", id, actual.username());
     }
 
-    private Comentario buscar(Long id) {
+    @Override
+    @Transactional
+    public ComentarioResponse cambiarEstado(Long id, EstadoContenido estado, UsuarioActual admin) {
+        Comentario comentario = buscarAccesible(id, true);
+        comentario.setEstado(estado);
+        Comentario guardado = repository.saveAndFlush(comentario);
+        log.info("Comentario {} marcado como {} por {}", id, estado, admin.username());
+        return ComentarioResponse.desde(guardado);
+    }
+
+    private boolean esAdmin(UsuarioActual actual) {
+        return actual != null && actual.esAdmin();
+    }
+
+    /** Un comentario baneado, o de un tema baneado, solo lo ve un administrador. */
+    private Comentario buscarAccesible(Long id, boolean admin) {
         return repository.findWithTemaById(id)
+                .filter(c -> admin || (c.getEstado() == EstadoContenido.VISIBLE && c.getTema().getEstado() == EstadoContenido.VISIBLE))
                 .orElseThrow(() -> new RecursoNoEncontradoException("No existe el comentario con id " + id));
     }
 
-    private Tema buscarTema(Long id) {
+    private Tema buscarTemaAccesible(Long id, boolean admin) {
         return temaRepository.findById(id)
+                .filter(t -> admin || t.getEstado() == EstadoContenido.VISIBLE)
                 .orElseThrow(() -> new RecursoNoEncontradoException("No existe el tema con id " + id));
     }
 }

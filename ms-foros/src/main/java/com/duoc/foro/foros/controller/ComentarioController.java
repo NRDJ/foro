@@ -2,6 +2,7 @@ package com.duoc.foro.foros.controller;
 
 import com.duoc.foro.foros.dto.ComentarioRequest;
 import com.duoc.foro.foros.dto.ComentarioResponse;
+import com.duoc.foro.foros.dto.EstadoRequest;
 import com.duoc.foro.foros.security.UsuarioActual;
 import com.duoc.foro.foros.service.ComentarioService;
 import jakarta.validation.Valid;
@@ -12,6 +13,7 @@ import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -28,8 +30,15 @@ public class ComentarioController {
     private final ComentarioService service;
 
     @GetMapping("/{id}")
-    public ComentarioResponse obtener(@PathVariable Long id) {
-        return service.obtener(id);
+    public ComentarioResponse obtener(@PathVariable Long id, @AuthenticationPrincipal Jwt jwt) {
+        return service.obtener(id, UsuarioActual.desdeOpcional(jwt));
+    }
+
+    /** Lo usa ms-moderacion para banear (BANEADO) o restaurar (VISIBLE) un comentario. Solo ADMIN. */
+    @PatchMapping("/{id}/estado")
+    public ComentarioResponse cambiarEstado(@PathVariable Long id, @Valid @RequestBody EstadoRequest request,
+                                            @AuthenticationPrincipal Jwt jwt) {
+        return service.cambiarEstado(id, request.estado(), UsuarioActual.desde(jwt));
     }
 
     @PutMapping("/{id}")

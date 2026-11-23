@@ -10,6 +10,11 @@ public record UsuarioActual(Long id, String username, String rol) {
         return new UsuarioActual(((Number) jwt.getClaim("uid")).longValue(), jwt.getSubject(), jwt.getClaimAsString("rol"));
     }
 
+    /** Para endpoints públicos: devuelve null cuando la solicitud no trae token. */
+    public static UsuarioActual desdeOpcional(Jwt jwt) {
+        return jwt == null ? null : desde(jwt);
+    }
+
     public boolean esAdmin() {
         return "ADMIN".equals(rol);
     }
