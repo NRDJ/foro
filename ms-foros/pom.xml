@@ -13,7 +13,7 @@
 
     <groupId>com.duoc.foro</groupId>
     <artifactId>ms-foros</artifactId>
-    <version>1.0.0</version>
+    <version>2.0.0</version>
     <name>ms-foros</name>
     <description>Busqueda, visualizacion, publicacion y comentarios de temas del foro</description>
 
