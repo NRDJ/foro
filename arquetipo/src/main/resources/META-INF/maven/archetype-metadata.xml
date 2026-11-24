@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<archetype-descriptor xmlns="http://maven.apache.org/plugins/maven-archetype-plugin/archetype-descriptor/1.1.0"
+                      xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                      xsi:schemaLocation="http://maven.apache.org/plugins/maven-archetype-plugin/archetype-descriptor/1.1.0 https://maven.apache.org/xsd/archetype-descriptor-1.1.0.xsd"
+                      name="foro-microservicio-archetype">
+
+    <requiredProperties>
+        <requiredProperty key="groupId">
+            <defaultValue>com.duoc.foro</defaultValue>
+        </requiredProperty>
+        <requiredProperty key="version">
+            <defaultValue>1.0.0</defaultValue>
+        </requiredProperty>
+        <!-- Prefijo de la clase principal: MsModeracion genera MsModeracionApplication -->
+        <requiredProperty key="prefijoClase"/>
+        <requiredProperty key="puerto">
+            <defaultValue>8080</defaultValue>
+        </requiredProperty>
+        <requiredProperty key="descripcion">
+            <defaultValue>Microservicio del Sistema de Foros en Linea</defaultValue>
+        </requiredProperty>
+    </requiredProperties>
+
+    <fileSets>
+        <fileSet filtered="true" packaged="true" encoding="UTF-8">
+            <directory>src/main/java</directory>
+            <includes>
+                <include>**/*.java</include>
+            </includes>
+        </fileSet>
+        <fileSet filtered="true" encoding="UTF-8">
+            <directory>src/main/resources</directory>
+            <includes>
+                <include>**/*.properties</include>
+            </includes>
+        </fileSet>
+        <fileSet filtered="true" packaged="true" encoding="UTF-8">
+            <directory>src/test/java</directory>
+            <includes>
+                <include>**/*.java</include>
+            </includes>
+        </fileSet>
+        <fileSet filtered="true" encoding="UTF-8">
+            <directory>src/test/resources</directory>
+            <includes>
+                <include>**/*.properties</include>
+            </includes>
+        </fileSet>
+        <fileSet filtered="true" encoding="UTF-8">
+            <directory></directory>
+            <includes>
+                <include>Dockerfile</include>
+                <include>.dockerignore</include>
+            </includes>
+        </fileSet>
+    </fileSets>
+</archetype-descriptor>

@@ -1,5 +1,6 @@
 package com.duoc.foro.foros.repository;
 
+import com.duoc.foro.foros.model.EstadoContenido;
 import com.duoc.foro.foros.model.Tema;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -22,6 +23,7 @@ public interface TemaRepository extends JpaRepository<Tema, Long> {
     /**
      * Búsqueda combinable por texto (título o contenido), categoría y autor.
      * El patrón nunca es nulo ("%" = todos); los filtros nulos no se aplican.
+     * Solo devuelve temas en el estado indicado (la búsqueda pública pide VISIBLE).
      */
     @EntityGraph(attributePaths = "categoria")
     @Query("""
@@ -29,9 +31,11 @@ public interface TemaRepository extends JpaRepository<Tema, Long> {
             where (lower(t.titulo) like :patron escape '\\' or lower(t.contenido) like :patron escape '\\')
               and (:categoriaId is null or t.categoria.id = :categoriaId)
               and (:autorId is null or t.autorId = :autorId)
+              and t.estado = :estado
             """)
     Page<Tema> buscar(@Param("patron") String patron,
                       @Param("categoriaId") Long categoriaId,
                       @Param("autorId") Long autorId,
+                      @Param("estado") EstadoContenido estado,
                       Pageable pageable);
 }

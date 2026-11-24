@@ -34,6 +34,8 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/api/categorias/**", "/api/temas/**", "/api/comentarios/**").permitAll()
                         .requestMatchers("/actuator/health").permitAll()
                         .requestMatchers("/api/categorias/**").hasRole("ADMIN")
+                        // Solo un administrador (desde ms-moderacion) puede banear o restaurar contenido.
+                        .requestMatchers(HttpMethod.PATCH, "/api/temas/*/estado", "/api/comentarios/*/estado").hasRole("ADMIN")
                         .anyRequest().authenticated())
                 .oauth2ResourceServer(oauth -> oauth
                         .jwt(jwt -> jwt.jwtAuthenticationConverter(convertidorDeRoles()))

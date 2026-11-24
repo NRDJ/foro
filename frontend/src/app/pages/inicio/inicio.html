@@ -1,0 +1,81 @@
+@if (bienvenida && foro.usuario(); as u) {
+  <div class="alert alert-success" role="status"><i class="bi bi-stars"></i> ¡Bienvenido/a a Ágora, {{ u.nombre }}! Tu cuenta quedó creada.</div>
+}
+
+<section class="hero rounded-4 mb-5">
+  <div class="row align-items-center g-4 p-4 p-md-5">
+    <div class="col-12 col-md-7">
+      <h1 class="display-5 fw-bold">Conversa, pregunta y comparte</h1>
+      <p class="lead mb-4">Ágora reúne comunidades de tecnología, videojuegos, deportes, cine y música en un solo lugar.</p>
+      <div class="d-flex flex-wrap gap-2">
+        @if (foro.usuario()) {
+          <a class="btn btn-acento btn-lg" routerLink="/temas/nuevo"><i class="bi bi-plus-circle"></i> Publicar un tema</a>
+        } @else {
+          <a class="btn btn-acento btn-lg" routerLink="/registro">Crear cuenta gratis</a>
+          <a class="btn btn-outline-light btn-lg" routerLink="/login">Iniciar sesión</a>
+        }
+      </div>
+    </div>
+    <div class="col-12 col-md-5 text-center">
+      <img src="img/hero.svg" class="img-fluid hero-img" alt="Personas conversando en burbujas de diálogo" />
+    </div>
+  </div>
+</section>
+
+<section class="mb-5" aria-labelledby="titulo-categorias">
+  <h2 id="titulo-categorias" class="h4 mb-3">Categorías</h2>
+  <!-- Grilla de 12 columnas: 1 por fila en móvil, 2 en tablet, 3 en escritorio y 5 en pantallas grandes -->
+  <div class="row row-cols-1 row-cols-sm-2 row-cols-lg-3 row-cols-xl-5 g-3">
+    @for (c of foro.categorias; track c.id) {
+      <div class="col">
+        <a class="card tarjeta-categoria h-100 text-decoration-none" [routerLink]="['/categorias', c.id]">
+          <img [src]="c.imagen" class="card-img-top" [alt]="'Ilustración de ' + c.nombre" />
+          <div class="card-body">
+            <h3 class="h6 card-title mb-1"><i class="bi" [class]="c.icono"></i> {{ c.nombre }}</h3>
+            <p class="small text-secondary mb-2">{{ c.descripcion }}</p>
+            <span class="badge etiqueta-categoria">{{ foro.totalTemas(c.id) }} temas</span>
+          </div>
+        </a>
+      </div>
+    }
+  </div>
+</section>
+
+<section aria-labelledby="titulo-temas">
+  <div class="d-flex flex-wrap justify-content-between align-items-end gap-3 mb-3">
+    <h2 id="titulo-temas" class="h4 mb-0">Temas recientes</h2>
+    <form class="row g-2 buscador" role="search" (ngSubmit)="filtrar(q.value, cat.value ? +cat.value : null)">
+      <div class="col-12 col-sm-6">
+        <label for="q" class="visually-hidden">Buscar</label>
+        <input #q id="q" class="form-control" type="search" placeholder="Buscar por título o contenido" maxlength="100"
+               (input)="filtrar(q.value, cat.value ? +cat.value : null)" />
+      </div>
+      <div class="col-8 col-sm-4">
+        <label for="cat" class="visually-hidden">Categoría</label>
+        <select #cat id="cat" class="form-select" (change)="filtrar(q.value, cat.value ? +cat.value : null)">
+          <option value="">Todas</option>
+          @for (c of foro.categorias; track c.id) {
+            <option [value]="c.id">{{ c.nombre }}</option>
+          }
+        </select>
+      </div>
+      <div class="col-4 col-sm-2 d-grid">
+        <button class="btn btn-primary" type="submit" aria-label="Buscar"><i class="bi bi-search"></i></button>
+      </div>
+    </form>
+  </div>
+
+  <p class="small text-secondary">{{ resultados().length }} resultado(s)</p>
+  <div class="row g-3">
+    @for (t of visibles(); track t.id) {
+      <div class="col-12 col-md-6 col-xl-4"><app-tarjeta-tema [tema]="t" /></div>
+    } @empty {
+      <div class="col-12">
+        <div class="text-center text-secondary py-5"><i class="bi bi-search icono-grande"></i><p class="mt-2">No hay temas que coincidan con la búsqueda.</p></div>
+      </div>
+    }
+  </div>
+  @if (visibles().length < resultados().length) {
+    <div class="text-center mt-4"><button class="btn btn-outline-primary" type="button" (click)="verMas()">Ver más temas</button></div>
+  }
+</section>

@@ -1,7 +1,7 @@
 {
   "info": {
     "name": "Foro en Linea - Microservicios",
-    "description": "Pruebas de ms-usuarios (8081) y ms-foros (8082) contra Oracle local. Ejecutar en orden con el Collection Runner o request por request: el login guarda los tokens y los POST guardan los id en variables de la coleccion.",
+    "description": "Pruebas de ms-usuarios (8081), ms-foros (8082) y ms-moderacion (8083) contra Oracle local. Ejecutar en orden con el Collection Runner o request por request: el login guarda los tokens y los POST guardan los id en variables de la coleccion.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "variable": [
@@ -12,6 +12,10 @@
     {
       "key": "baseForos",
       "value": "http://localhost:8082"
+    },
+    {
+      "key": "baseModeracion",
+      "value": "http://localhost:8083"
     },
     {
       "key": "claveSemilla",
@@ -55,6 +59,10 @@
     },
     {
       "key": "comentarioId",
+      "value": ""
+    },
+    {
+      "key": "baneoId",
       "value": ""
     }
   ],
@@ -2044,7 +2052,730 @@
       ]
     },
     {
-      "name": "6. Limpieza",
+      "name": "6. ms-moderacion - Baneos",
+      "description": "Banear oculta el contenido en ms-foros (ms-moderacion llama a PATCH /estado); revertir lo vuelve visible.",
+      "item": [
+        {
+          "name": "GET baneos (ADMIN)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Responde 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Responde JSON', () => pm.response.to.be.json);",
+                  "pm.test('Al menos 3 baneos', () => pm.expect(pm.response.json().length).to.be.at.least(3));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseModeracion}}/api/baneos",
+              "host": [
+                "{{baseModeracion}}"
+              ],
+              "path": [
+                "api",
+                "baneos"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{tokenAdmin}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "GET baneos filtrados por tipo",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Responde 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Responde JSON', () => pm.response.to.be.json);",
+                  "pm.test('Solo comentarios', () => pm.response.json().forEach(b => pm.expect(b.tipo).to.eql('COMENTARIO')));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseModeracion}}/api/baneos?tipo=COMENTARIO",
+              "host": [
+                "{{baseModeracion}}"
+              ],
+              "path": [
+                "api",
+                "baneos"
+              ],
+              "query": [
+                {
+                  "key": "tipo",
+                  "value": "COMENTARIO"
+                }
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{tokenAdmin}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "GET baneos con rol USUARIO (403)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Responde 403', () => pm.response.to.have.status(403));",
+                  "pm.test('Responde JSON', () => pm.response.to.be.json);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseModeracion}}/api/baneos",
+              "host": [
+                "{{baseModeracion}}"
+              ],
+              "path": [
+                "api",
+                "baneos"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{tokenCamila}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "GET baneos sin sesion (401)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Responde 401', () => pm.response.to.have.status(401));",
+                  "pm.test('Responde JSON', () => pm.response.to.be.json);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseModeracion}}/api/baneos",
+              "host": [
+                "{{baseModeracion}}"
+              ],
+              "path": [
+                "api",
+                "baneos"
+              ]
+            },
+            "auth": {
+              "type": "noauth"
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "GET baneo por id",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Responde 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Responde JSON', () => pm.response.to.be.json);",
+                  "pm.test('Es el baneo del tema 7', () => pm.expect(pm.response.json().contenidoId).to.eql(7));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseModeracion}}/api/baneos/1",
+              "host": [
+                "{{baseModeracion}}"
+              ],
+              "path": [
+                "api",
+                "baneos",
+                "1"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{tokenAdmin}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "GET tema 7 ya baneado no es publico (404)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Responde 404', () => pm.response.to.have.status(404));",
+                  "pm.test('Responde JSON', () => pm.response.to.be.json);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseForos}}/api/temas/7",
+              "host": [
+                "{{baseForos}}"
+              ],
+              "path": [
+                "api",
+                "temas",
+                "7"
+              ]
+            },
+            "auth": {
+              "type": "noauth"
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "POST banear tema",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Responde 201', () => pm.response.to.have.status(201));",
+                  "pm.test('Responde JSON', () => pm.response.to.be.json);",
+                  "pm.collectionVariables.set('baneoId', pm.response.json().id);",
+                  "pm.test('Registra al moderador', () => pm.expect(pm.response.json().moderadorUsername).to.eql('admin'));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseModeracion}}/api/baneos",
+              "host": [
+                "{{baseModeracion}}"
+              ],
+              "path": [
+                "api",
+                "baneos"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{tokenAdmin}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"tipo\": \"TEMA\",\n  \"contenidoId\": {{temaId}},\n  \"motivo\": \"Prueba de moderación desde Postman\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "GET tema baneado para el publico (404)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Responde 404', () => pm.response.to.have.status(404));",
+                  "pm.test('Responde JSON', () => pm.response.to.be.json);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseForos}}/api/temas/{{temaId}}",
+              "host": [
+                "{{baseForos}}"
+              ],
+              "path": [
+                "api",
+                "temas",
+                "{{temaId}}"
+              ]
+            },
+            "auth": {
+              "type": "noauth"
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "GET tema baneado como ADMIN",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Responde 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Responde JSON', () => pm.response.to.be.json);",
+                  "pm.test('Estado BANEADO', () => pm.expect(pm.response.json().tema.estado).to.eql('BANEADO'));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseForos}}/api/temas/{{temaId}}",
+              "host": [
+                "{{baseForos}}"
+              ],
+              "path": [
+                "api",
+                "temas",
+                "{{temaId}}"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{tokenAdmin}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "PUT tema baneado por su autor (404)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Responde 404', () => pm.response.to.have.status(404));",
+                  "pm.test('Responde JSON', () => pm.response.to.be.json);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseForos}}/api/temas/{{temaId}}",
+              "host": [
+                "{{baseForos}}"
+              ],
+              "path": [
+                "api",
+                "temas",
+                "{{temaId}}"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{tokenCamila}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"titulo\": \"Intento\",\n  \"contenido\": \"Intento de editar contenido baneado\",\n  \"categoriaId\": {{categoriaId}}\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "POST banear dos veces (409)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Responde 409', () => pm.response.to.have.status(409));",
+                  "pm.test('Responde JSON', () => pm.response.to.be.json);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseModeracion}}/api/baneos",
+              "host": [
+                "{{baseModeracion}}"
+              ],
+              "path": [
+                "api",
+                "baneos"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{tokenAdmin}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"tipo\": \"TEMA\",\n  \"contenidoId\": {{temaId}},\n  \"motivo\": \"Duplicado\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "POST banear contenido inexistente (404)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Responde 404', () => pm.response.to.have.status(404));",
+                  "pm.test('Responde JSON', () => pm.response.to.be.json);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseModeracion}}/api/baneos",
+              "host": [
+                "{{baseModeracion}}"
+              ],
+              "path": [
+                "api",
+                "baneos"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{tokenAdmin}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"tipo\": \"COMENTARIO\",\n  \"contenidoId\": 999999,\n  \"motivo\": \"No existe\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "POST banear con datos invalidos (400)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Responde 400', () => pm.response.to.have.status(400));",
+                  "pm.test('Responde JSON', () => pm.response.to.be.json);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseModeracion}}/api/baneos",
+              "host": [
+                "{{baseModeracion}}"
+              ],
+              "path": [
+                "api",
+                "baneos"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{tokenAdmin}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"tipo\": \"OTRO\",\n  \"contenidoId\": -1,\n  \"motivo\": \"\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "PUT modificar motivo",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Responde 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Responde JSON', () => pm.response.to.be.json);",
+                  "pm.test('Motivo actualizado', () => pm.expect(pm.response.json().motivo).to.include('temporalmente'));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseModeracion}}/api/baneos/{{baneoId}}",
+              "host": [
+                "{{baseModeracion}}"
+              ],
+              "path": [
+                "api",
+                "baneos",
+                "{{baneoId}}"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{tokenAdmin}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"motivo\": \"Contenido de prueba retirado temporalmente\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "DELETE revertir baneo",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Responde 204', () => pm.response.to.have.status(204));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseModeracion}}/api/baneos/{{baneoId}}",
+              "host": [
+                "{{baseModeracion}}"
+              ],
+              "path": [
+                "api",
+                "baneos",
+                "{{baneoId}}"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{tokenAdmin}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "GET tema restaurado es publico otra vez",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Responde 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Responde JSON', () => pm.response.to.be.json);",
+                  "pm.test('Estado VISIBLE', () => pm.expect(pm.response.json().tema.estado).to.eql('VISIBLE'));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseForos}}/api/temas/{{temaId}}",
+              "host": [
+                "{{baseForos}}"
+              ],
+              "path": [
+                "api",
+                "temas",
+                "{{temaId}}"
+              ]
+            },
+            "auth": {
+              "type": "noauth"
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "7. Limpieza",
       "item": [
         {
           "name": "DELETE tema (autor)",

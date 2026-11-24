@@ -1,0 +1,273 @@
+/* Diseño de Ágora: Bootstrap 5 + identidad propia (colores, tipografía, tarjetas). */
+
+:root {
+  --agora-primario: #0f5257;
+  --agora-primario-oscuro: #0a3b3f;
+  --agora-primario-claro: #e3f1f1;
+  --agora-acento: #f2a541;
+  --agora-acento-oscuro: #d98a1f;
+  --agora-fondo: #f6f4ef;
+  --agora-texto: #1f2a2e;
+  --agora-borde: #e2ded4;
+
+  --bs-body-bg: var(--agora-fondo);
+  --bs-body-color: var(--agora-texto);
+  --bs-link-color-rgb: 15, 82, 87;
+  --bs-link-hover-color-rgb: 10, 59, 63;
+  --bs-border-radius: 0.6rem;
+  --bs-font-sans-serif: 'Segoe UI', system-ui, -apple-system, Roboto, 'Helvetica Neue', Arial, sans-serif;
+}
+
+body {
+  background: var(--agora-fondo);
+}
+
+h1, h2, h3, .marca {
+  letter-spacing: -0.01em;
+}
+
+/* Botones con los colores de la marca */
+.btn-primary {
+  --bs-btn-bg: var(--agora-primario);
+  --bs-btn-border-color: var(--agora-primario);
+  --bs-btn-hover-bg: var(--agora-primario-oscuro);
+  --bs-btn-hover-border-color: var(--agora-primario-oscuro);
+  --bs-btn-active-bg: var(--agora-primario-oscuro);
+  --bs-btn-active-border-color: var(--agora-primario-oscuro);
+  --bs-btn-disabled-bg: var(--agora-primario);
+  --bs-btn-disabled-border-color: var(--agora-primario);
+}
+
+.btn-outline-primary {
+  --bs-btn-color: var(--agora-primario);
+  --bs-btn-border-color: var(--agora-primario);
+  --bs-btn-hover-bg: var(--agora-primario);
+  --bs-btn-hover-border-color: var(--agora-primario);
+  --bs-btn-active-bg: var(--agora-primario-oscuro);
+}
+
+.btn-acento {
+  --bs-btn-color: #2b1a00;
+  --bs-btn-bg: var(--agora-acento);
+  --bs-btn-border-color: var(--agora-acento);
+  --bs-btn-hover-color: #2b1a00;
+  --bs-btn-hover-bg: var(--agora-acento-oscuro);
+  --bs-btn-hover-border-color: var(--agora-acento-oscuro);
+  --bs-btn-active-bg: var(--agora-acento-oscuro);
+  font-weight: 600;
+}
+
+.form-control:focus,
+.form-select:focus,
+.form-check-input:focus {
+  border-color: var(--agora-primario);
+  box-shadow: 0 0 0 0.2rem rgba(15, 82, 87, 0.2);
+}
+
+.form-check-input:checked {
+  background-color: var(--agora-primario);
+  border-color: var(--agora-primario);
+}
+
+.texto-primario {
+  color: var(--agora-primario);
+}
+
+.icono-grande {
+  font-size: 3rem;
+  color: var(--agora-primario);
+}
+
+/* Barra de navegación y pie */
+.barra {
+  background: linear-gradient(90deg, var(--agora-primario-oscuro), var(--agora-primario));
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.12);
+}
+
+.marca {
+  font-weight: 700;
+  font-size: 1.4rem;
+}
+
+.pie {
+  background: var(--agora-primario-oscuro);
+  color: #fff;
+}
+
+.pie a {
+  color: var(--agora-acento);
+  text-decoration: none;
+}
+
+/* Tarjetas */
+.panel,
+.tarjeta-tema,
+.tarjeta-categoria,
+.comentario,
+.indicador {
+  border: 1px solid var(--agora-borde);
+  box-shadow: 0 1px 3px rgba(31, 42, 46, 0.06);
+}
+
+.tarjeta-tema,
+.tarjeta-categoria {
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.tarjeta-tema:hover,
+.tarjeta-categoria:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 20px rgba(31, 42, 46, 0.12);
+}
+
+.tarjeta-categoria .card-img-top {
+  aspect-ratio: 16 / 9;
+  object-fit: cover;
+  background: var(--agora-primario-claro);
+}
+
+.tarjeta-categoria .card-title {
+  color: var(--agora-texto);
+}
+
+.enlace-tema {
+  color: var(--agora-texto);
+  text-decoration: none;
+}
+
+.enlace-tema:hover {
+  color: var(--agora-primario);
+}
+
+/* Las etiquetas quedan sobre el enlace que cubre la tarjeta */
+.tarjeta-tema .etiqueta-categoria {
+  position: relative;
+  z-index: 2;
+}
+
+.etiqueta-categoria {
+  background: var(--agora-primario-claro);
+  color: var(--agora-primario);
+}
+
+.resumen {
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.contenido-tema {
+  white-space: pre-line;
+  font-size: 1.05rem;
+}
+
+.contenido-baneado {
+  border-left: 4px solid var(--bs-danger);
+  background: #fff6f6;
+}
+
+.baneo {
+  background: #fff1f0;
+  border: 1px dashed var(--bs-danger);
+}
+
+/* Portada */
+.hero {
+  background: radial-gradient(circle at 85% 20%, rgba(242, 165, 65, 0.35), transparent 40%),
+    linear-gradient(135deg, var(--agora-primario-oscuro), var(--agora-primario));
+  color: #fff;
+}
+
+.hero-img {
+  max-height: 260px;
+}
+
+.buscador {
+  min-width: min(100%, 520px);
+}
+
+.cabecera-categoria,
+.cabecera-perfil {
+  background: #fff;
+  border: 1px solid var(--agora-borde);
+}
+
+.cabecera-perfil {
+  background: linear-gradient(135deg, var(--agora-primario), var(--agora-primario-oscuro));
+  color: #fff;
+  border: 0;
+}
+
+.avatar {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  background: var(--agora-acento);
+  color: #2b1a00;
+  display: grid;
+  place-items: center;
+  font-size: 2rem;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+/* Indicadores del panel de moderación */
+.indicador .card-body {
+  display: flex;
+  flex-direction: column;
+}
+
+.indicador .valor {
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--agora-primario);
+}
+
+.texto-corto {
+  max-width: 320px;
+}
+
+/* Requisitos de la contraseña y pasos de recuperación */
+.requisitos li {
+  color: #8a8f93;
+}
+
+.requisitos li.cumple {
+  color: var(--bs-success);
+}
+
+.pasos li {
+  color: #9aa0a4;
+  padding-bottom: 0.25rem;
+  border-bottom: 3px solid transparent;
+}
+
+.pasos li.activo {
+  color: var(--agora-primario);
+  border-bottom-color: var(--agora-acento);
+  font-weight: 600;
+}
+
+/* Pantallas pequeñas (menos de 576 px) */
+@media (max-width: 575.98px) {
+  .hero h1 {
+    font-size: 2rem;
+  }
+
+  .hero-img {
+    max-height: 160px;
+  }
+
+  .texto-corto {
+    max-width: 160px;
+  }
+}
+
+/* Tablet (768 px o más) */
+@media (min-width: 768px) {
+  .contenido-tema {
+    font-size: 1.1rem;
+  }
+}

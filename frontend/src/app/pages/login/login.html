@@ -1,0 +1,56 @@
+<section class="row justify-content-center">
+  <div class="col-12 col-sm-10 col-md-8 col-lg-5">
+    <div class="card panel">
+      <div class="card-body p-4 p-md-5">
+        <div class="text-center mb-4">
+          <img src="logo.svg" alt="Logo de Ágora" width="64" height="64" />
+          <h1 class="h3 mt-3">Iniciar sesión</h1>
+          <p class="text-secondary mb-0">Vuelve a la conversación</p>
+        </div>
+
+        @if (error()) {
+          <div class="alert alert-danger" role="alert"><i class="bi bi-exclamation-triangle"></i> {{ error() }}</div>
+        }
+
+        <form [formGroup]="form" (ngSubmit)="entrar()" novalidate>
+          <div class="mb-3">
+            <label for="usuario" class="form-label">Usuario o correo</label>
+            <input id="usuario" class="form-control" formControlName="usuario" autocomplete="username"
+                   required maxlength="120" [class.is-invalid]="form.controls.usuario.invalid && form.controls.usuario.touched" />
+            <app-error-campo [control]="form.controls.usuario" />
+          </div>
+          <div class="mb-2">
+            <label for="password" class="form-label">Contraseña</label>
+            <div class="input-group has-validation">
+              <input id="password" class="form-control" formControlName="password" autocomplete="current-password"
+                     [type]="verClave() ? 'text' : 'password'" required maxlength="72"
+                     [class.is-invalid]="form.controls.password.invalid && form.controls.password.touched" />
+              <button class="btn btn-outline-secondary" type="button" (click)="verClave.set(!verClave())"
+                      [attr.aria-label]="verClave() ? 'Ocultar contraseña' : 'Mostrar contraseña'">
+                <i class="bi" [class.bi-eye]="!verClave()" [class.bi-eye-slash]="verClave()"></i>
+              </button>
+            </div>
+            <app-error-campo [control]="form.controls.password" />
+          </div>
+          <div class="text-end mb-4">
+            <a routerLink="/recuperar" class="small">¿Olvidaste tu contraseña?</a>
+          </div>
+          <button class="btn btn-primary w-100 btn-lg" type="submit">Entrar</button>
+        </form>
+
+        <p class="text-center mt-4 mb-0">¿No tienes cuenta? <a routerLink="/registro">Regístrate</a></p>
+      </div>
+    </div>
+
+    <div class="card mt-3 border-0 bg-transparent">
+      <div class="card-body small text-secondary">
+        <p class="mb-2"><i class="bi bi-info-circle"></i> Usuarios de prueba (clave <code>Foro2026!</code>):</p>
+        <div class="d-flex flex-wrap gap-2">
+          <button type="button" class="btn btn-sm btn-outline-warning" (click)="usar('admin')">admin · ADMIN</button>
+          <button type="button" class="btn btn-sm btn-outline-secondary" (click)="usar('camila.rojas')">camila.rojas · USUARIO</button>
+          <button type="button" class="btn btn-sm btn-outline-secondary" (click)="usar('diego.soto')">diego.soto · USUARIO</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>

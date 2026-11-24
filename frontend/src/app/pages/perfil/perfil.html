@@ -1,0 +1,103 @@
+@if (usuario(); as u) {
+  <section class="cabecera-perfil rounded-4 p-4 mb-4 d-flex flex-column flex-sm-row align-items-sm-center gap-3">
+    <div class="avatar">{{ u.nombre.charAt(0) }}</div>
+    <div>
+      <h1 class="h3 mb-1">{{ u.nombre }}</h1>
+      <p class="mb-0 opacity-75">&#64;{{ u.username }} · {{ u.rol }} · miembro desde {{ u.fechaCreacion | date: 'MMMM yyyy' }}</p>
+    </div>
+  </section>
+
+  <div class="row g-4">
+    <div class="col-12 col-lg-6">
+      <div class="card panel h-100">
+        <div class="card-body p-4">
+          <h2 class="h5 mb-3"><i class="bi bi-person-lines-fill"></i> Modificar perfil</h2>
+          @if (avisoDatos(); as a) {
+            <div class="alert" [class.alert-success]="a.tipo === 'success'" [class.alert-danger]="a.tipo === 'danger'" role="status">{{ a.texto }}</div>
+          }
+          <form [formGroup]="formDatos" (ngSubmit)="guardarDatos()" novalidate>
+            <div class="mb-3">
+              <label for="username" class="form-label">Nombre de usuario</label>
+              <input id="username" class="form-control" [value]="u.username" disabled />
+              <div class="form-text">El nombre de usuario no se puede cambiar.</div>
+            </div>
+            <div class="mb-3">
+              <label for="nombre" class="form-label">Nombre completo</label>
+              <input id="nombre" class="form-control" formControlName="nombre" required minlength="3" maxlength="100"
+                     [class.is-invalid]="formDatos.controls.nombre.invalid && formDatos.controls.nombre.touched" />
+              <app-error-campo [control]="formDatos.controls.nombre" patron="Solo letras, espacios, apóstrofo o guion" />
+            </div>
+            <div class="mb-4">
+              <label for="email" class="form-label">Correo electrónico</label>
+              <input id="email" type="email" class="form-control" formControlName="email" required maxlength="120"
+                     [class.is-invalid]="formDatos.controls.email.invalid && formDatos.controls.email.touched" />
+              <app-error-campo [control]="formDatos.controls.email" patron="Ingresa un correo válido, por ejemplo nombre@dominio.cl" />
+            </div>
+            <button class="btn btn-primary" type="submit">Guardar cambios</button>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-12 col-lg-6">
+      <div class="card panel h-100">
+        <div class="card-body p-4">
+          <h2 class="h5 mb-3"><i class="bi bi-shield-lock"></i> Cambiar contraseña</h2>
+          @if (avisoClave(); as a) {
+            <div class="alert" [class.alert-success]="a.tipo === 'success'" [class.alert-danger]="a.tipo === 'danger'" role="status">{{ a.texto }}</div>
+          }
+          <form [formGroup]="formClave" (ngSubmit)="cambiarClave()" novalidate>
+            <div class="mb-3">
+              <label for="actual" class="form-label">Contraseña actual</label>
+              <input id="actual" type="password" class="form-control" formControlName="actual" autocomplete="current-password" required
+                     [class.is-invalid]="formClave.controls.actual.invalid && formClave.controls.actual.touched" />
+              <app-error-campo [control]="formClave.controls.actual" />
+            </div>
+            <div class="mb-3">
+              <label for="nueva" class="form-label">Nueva contraseña</label>
+              <input id="nueva" type="password" class="form-control" formControlName="password" autocomplete="new-password" required
+                     [class.is-invalid]="formClave.controls.password.invalid && formClave.controls.password.touched" />
+              <app-requisitos-password [control]="formClave.controls.password" />
+            </div>
+            <div class="mb-4">
+              <label for="confirmar" class="form-label">Confirmar nueva contraseña</label>
+              <input id="confirmar" type="password" class="form-control" formControlName="confirmar" autocomplete="new-password" required
+                     [class.is-invalid]="(formClave.controls.confirmar.invalid || formClave.hasError('noCoinciden')) && formClave.controls.confirmar.touched" />
+              <app-error-campo [control]="formClave.controls.confirmar" />
+              @if (formClave.hasError('noCoinciden') && formClave.controls.confirmar.touched) {
+                <div class="invalid-feedback d-block">Las contraseñas no coinciden</div>
+              }
+            </div>
+            <button class="btn btn-primary" type="submit">Cambiar contraseña</button>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-12">
+      <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+        <h2 class="h5 mb-0"><i class="bi bi-journal-text"></i> Mis publicaciones ({{ misTemas().length }})</h2>
+        <a class="btn btn-outline-primary btn-sm" routerLink="/temas/nuevo"><i class="bi bi-plus-lg"></i> Nuevo tema</a>
+      </div>
+      <div class="row g-3">
+        @for (t of misTemas(); track t.id) {
+          <div class="col-12 col-md-6 col-xl-4"><app-tarjeta-tema [tema]="t" /></div>
+        } @empty {
+          <div class="col-12"><p class="text-secondary">Aún no has publicado temas.</p></div>
+        }
+      </div>
+    </div>
+
+    <div class="col-12">
+      <div class="card border-danger-subtle">
+        <div class="card-body d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-2">
+          <div>
+            <h2 class="h6 text-danger mb-1">Eliminar mi cuenta</h2>
+            <p class="small text-secondary mb-0">Esta acción no se puede deshacer.</p>
+          </div>
+          <button class="btn btn-outline-danger" type="button" (click)="eliminarCuenta()">Eliminar cuenta</button>
+        </div>
+      </div>
+    </div>
+  </div>
+}

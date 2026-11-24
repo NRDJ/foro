@@ -1,0 +1,161 @@
+@if (tema(); as t) {
+  <nav aria-label="Ruta" class="mb-3">
+    <ol class="breadcrumb">
+      <li class="breadcrumb-item"><a routerLink="/">Inicio</a></li>
+      <li class="breadcrumb-item"><a [routerLink]="['/categorias', t.categoriaId]">{{ foro.nombreCategoria(t.categoriaId) }}</a></li>
+      <li class="breadcrumb-item active text-truncate" aria-current="page">{{ t.titulo }}</li>
+    </ol>
+  </nav>
+
+  @if (aviso(); as a) {
+    <div class="alert alert-dismissible" [class.alert-success]="a.tipo === 'success'" [class.alert-danger]="a.tipo === 'danger'" role="status">
+      {{ a.texto }}
+      <button type="button" class="btn-close" aria-label="Cerrar" (click)="aviso.set(null)"></button>
+    </div>
+  }
+
+  <div class="row g-4">
+    <div class="col-12 col-lg-8">
+      <article class="card panel mb-4" [class.contenido-baneado]="t.estado === 'BANEADO'">
+        <div class="card-body p-4">
+          @if (t.estado === 'BANEADO') {
+            <div class="alert alert-danger small mb-3">
+              <i class="bi bi-slash-circle"></i> Tema baneado: solo los administradores lo ven.
+              Motivo: {{ foro.baneoDe('TEMA', t.id)?.motivo }}
+            </div>
+          }
+          <h1 class="h3">{{ t.titulo }}</h1>
+          <p class="small text-secondary">
+            <i class="bi bi-person-circle"></i> {{ t.autorUsername }} ·
+            <i class="bi bi-calendar3"></i> {{ t.fechaCreacion | date: 'dd-MM-yyyy HH:mm' }}
+            @if (t.fechaActualizacion !== t.fechaCreacion) { · editado }
+          </p>
+          <p class="contenido-tema">{{ t.contenido }}</p>
+
+          <div class="d-flex flex-wrap gap-2 mt-3">
+            @if (foro.puedeGestionar(t.autorId)) {
+              <a class="btn btn-outline-primary btn-sm" [routerLink]="['/temas', t.id, 'editar']"><i class="bi bi-pencil"></i> Editar</a>
+              <button class="btn btn-outline-danger btn-sm" type="button" (click)="eliminarTema()"><i class="bi bi-trash"></i> Eliminar</button>
+            }
+            @if (foro.esAdmin()) {
+              @if (t.estado === 'VISIBLE') {
+                <button class="btn btn-danger btn-sm" type="button" (click)="abrirBaneo('TEMA', t.id)"><i class="bi bi-slash-circle"></i> Banear tema</button>
+              } @else {
+                <button class="btn btn-success btn-sm" type="button" (click)="restaurar('TEMA', t.id)"><i class="bi bi-arrow-counterclockwise"></i> Restaurar tema</button>
+              }
+            }
+          </div>
+
+          @if (baneando()?.tipo === 'TEMA') {
+            <ng-container *ngTemplateOutlet="formularioBaneo" />
+          }
+        </div>
+      </article>
+
+      <section aria-labelledby="titulo-comentarios">
+        <h2 id="titulo-comentarios" class="h5 mb-3"><i class="bi bi-chat-dots"></i> Comentarios ({{ foro.totalComentarios(t.id) }})</h2>
+
+        @for (c of comentarios(); track c.id) {
+          <div class="card comentario mb-3" [class.contenido-baneado]="c.estado === 'BANEADO'">
+            <div class="card-body">
+              <div class="d-flex flex-wrap justify-content-between gap-2 small text-secondary mb-2">
+                <span><i class="bi bi-person-circle"></i> <strong>{{ c.autorUsername }}</strong> · {{ c.fechaCreacion | date: 'dd-MM-yyyy HH:mm' }}</span>
+                @if (c.estado === 'BANEADO') {
+                  <span class="badge text-bg-danger">Baneado: {{ foro.baneoDe('COMENTARIO', c.id)?.motivo }}</span>
+                }
+              </div>
+
+              @if (editando() === c.id) {
+                <form [formGroup]="formEdicion" (ngSubmit)="guardarEdicion(c)" novalidate>
+                  <label class="visually-hidden" [for]="'editar-' + c.id">Editar comentario</label>
+                  <textarea [id]="'editar-' + c.id" class="form-control" rows="3" formControlName="contenido" required maxlength="1000"
+                            [class.is-invalid]="formEdicion.controls.contenido.invalid && formEdicion.controls.contenido.touched"></textarea>
+                  <app-error-campo [control]="formEdicion.controls.contenido" />
+                  <div class="d-flex gap-2 mt-2">
+                    <button class="btn btn-primary btn-sm" type="submit">Guardar</button>
+                    <button class="btn btn-outline-secondary btn-sm" type="button" (click)="editando.set(null)">Cancelar</button>
+                  </div>
+                </form>
+              } @else {
+                <p class="mb-2">{{ c.contenido }}</p>
+                <div class="d-flex flex-wrap gap-2">
+                  @if (foro.puedeGestionar(c.autorId)) {
+                    <button class="btn btn-link btn-sm p-0" type="button" (click)="editar(c)">Editar</button>
+                    <button class="btn btn-link btn-sm p-0 text-danger" type="button" (click)="eliminarComentario(c)">Eliminar</button>
+                  }
+                  @if (foro.esAdmin()) {
+                    @if (c.estado === 'VISIBLE') {
+                      <button class="btn btn-link btn-sm p-0 text-danger" type="button" (click)="abrirBaneo('COMENTARIO', c.id)">Banear</button>
+                    } @else {
+                      <button class="btn btn-link btn-sm p-0 text-success" type="button" (click)="restaurar('COMENTARIO', c.id)">Restaurar</button>
+                    }
+                  }
+                </div>
+              }
+              @if (baneando()?.tipo === 'COMENTARIO' && baneando()?.id === c.id) {
+                <ng-container *ngTemplateOutlet="formularioBaneo" />
+              }
+            </div>
+          </div>
+        } @empty {
+          <p class="text-secondary">Aún no hay comentarios. ¡Sé el primero!</p>
+        }
+
+        @if (foro.usuario()) {
+          @if (t.estado === 'VISIBLE') {
+            <form class="card panel" [formGroup]="formComentario" (ngSubmit)="comentar()" novalidate>
+              <div class="card-body">
+                <label for="nuevo-comentario" class="form-label">Escribe un comentario</label>
+                <textarea id="nuevo-comentario" class="form-control" rows="3" formControlName="contenido" required maxlength="1000"
+                          [class.is-invalid]="formComentario.controls.contenido.invalid && formComentario.controls.contenido.touched"></textarea>
+                <div class="d-flex justify-content-between">
+                  <app-error-campo [control]="formComentario.controls.contenido" />
+                  <span class="form-text ms-auto">{{ formComentario.controls.contenido.value.length }}/1000</span>
+                </div>
+                <button class="btn btn-primary mt-2" type="submit"><i class="bi bi-send"></i> Comentar</button>
+              </div>
+            </form>
+          }
+        } @else {
+          <div class="alert alert-light border">
+            <a routerLink="/login" [queryParams]="{ volver: '/temas/' + t.id }">Inicia sesión</a> para comentar.
+          </div>
+        }
+      </section>
+    </div>
+
+    <aside class="col-12 col-lg-4">
+      <div class="card panel">
+        <div class="card-body">
+          <h2 class="h6">Normas de la comunidad</h2>
+          <ul class="small mb-0">
+            <li>Trata a los demás con respeto.</li>
+            <li>No publiques spam ni enlaces engañosos.</li>
+            <li>No vendas productos ni cuentas.</li>
+            <li>Los administradores pueden banear contenido que no cumpla estas normas.</li>
+          </ul>
+        </div>
+      </div>
+    </aside>
+  </div>
+
+  <ng-template #formularioBaneo>
+    <form class="baneo mt-3 p-3 rounded-3" [formGroup]="formBaneo" (ngSubmit)="confirmarBaneo()" novalidate>
+      <label for="motivo" class="form-label fw-semibold">Motivo del baneo</label>
+      <input id="motivo" class="form-control" formControlName="motivo" required minlength="5" maxlength="255"
+             placeholder="Ej.: spam, lenguaje ofensivo, comercio no permitido"
+             [class.is-invalid]="formBaneo.controls.motivo.invalid && formBaneo.controls.motivo.touched" />
+      <app-error-campo [control]="formBaneo.controls.motivo" />
+      <div class="d-flex gap-2 mt-2">
+        <button class="btn btn-danger btn-sm" type="submit">Confirmar baneo</button>
+        <button class="btn btn-outline-secondary btn-sm" type="button" (click)="baneando.set(null)">Cancelar</button>
+      </div>
+    </form>
+  </ng-template>
+} @else {
+  <div class="text-center py-5">
+    <i class="bi bi-question-circle icono-grande text-secondary"></i>
+    <h1 class="h4 mt-2">El tema no existe o fue retirado por moderación</h1>
+    <a routerLink="/" class="btn btn-primary mt-2">Volver al inicio</a>
+  </div>
+}
