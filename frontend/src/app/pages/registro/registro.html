@@ -1,0 +1,71 @@
+<section class="row justify-content-center">
+  <div class="col-12 col-md-10 col-lg-8 col-xl-7">
+    <div class="card panel">
+      <div class="card-body p-4 p-md-5">
+        <div class="text-center mb-4">
+          <img src="logo.svg" alt="Logo de Ágora" width="56" height="56" />
+          <h1 class="h3 mt-3">Crear cuenta</h1>
+          <p class="text-secondary mb-0">Únete y comparte tus temas favoritos</p>
+        </div>
+
+        @if (error()) {
+          <div class="alert alert-danger" role="alert">{{ error() }}</div>
+        }
+
+        <form [formGroup]="form" (ngSubmit)="registrar()" novalidate>
+          <div class="row g-3">
+            <div class="col-12 col-md-6">
+              <label for="nombre" class="form-label">Nombre completo</label>
+              <input id="nombre" class="form-control" formControlName="nombre" autocomplete="name" required minlength="3" maxlength="100"
+                     [class.is-invalid]="form.controls.nombre.invalid && form.controls.nombre.touched" />
+              <app-error-campo [control]="form.controls.nombre" patron="Solo letras, espacios, apóstrofo o guion" />
+            </div>
+            <div class="col-12 col-md-6">
+              <label for="username" class="form-label">Nombre de usuario</label>
+              <input id="username" class="form-control" formControlName="username" autocomplete="username" required maxlength="50"
+                     [class.is-invalid]="form.controls.username.invalid && form.controls.username.touched" />
+              <div class="form-text">De 3 a 50 caracteres: letras, números, punto, guion o guion bajo.</div>
+              <app-error-campo [control]="form.controls.username" patron="Usa de 3 a 50 letras, números, punto, guion o guion bajo, sin espacios" />
+            </div>
+            <div class="col-12">
+              <label for="email" class="form-label">Correo electrónico</label>
+              <input id="email" type="email" class="form-control" formControlName="email" autocomplete="email" required maxlength="120"
+                     [class.is-invalid]="form.controls.email.invalid && form.controls.email.touched" />
+              <app-error-campo [control]="form.controls.email" patron="Ingresa un correo válido, por ejemplo nombre@dominio.cl" />
+            </div>
+            <div class="col-12 col-md-6">
+              <label for="password" class="form-label">Contraseña</label>
+              <input id="password" type="password" class="form-control" formControlName="password" autocomplete="new-password" required
+                     [class.is-invalid]="form.controls.password.invalid && form.controls.password.touched" />
+              <app-requisitos-password [control]="form.controls.password" />
+            </div>
+            <div class="col-12 col-md-6">
+              <label for="confirmar" class="form-label">Confirmar contraseña</label>
+              <input id="confirmar" type="password" class="form-control" formControlName="confirmar" autocomplete="new-password" required
+                     [class.is-invalid]="(form.controls.confirmar.invalid || form.hasError('noCoinciden')) && form.controls.confirmar.touched" />
+              <app-error-campo [control]="form.controls.confirmar" />
+              @if (form.hasError('noCoinciden') && form.controls.confirmar.touched) {
+                <div class="invalid-feedback d-block">Las contraseñas no coinciden</div>
+              }
+            </div>
+            <div class="col-12">
+              <div class="form-check">
+                <input id="terminos" type="checkbox" class="form-check-input" formControlName="terminos" required
+                       [class.is-invalid]="form.controls.terminos.invalid && form.controls.terminos.touched" />
+                <label for="terminos" class="form-check-label">Acepto las normas de la comunidad: respeto, sin spam ni comercio.</label>
+                @if (form.controls.terminos.invalid && form.controls.terminos.touched) {
+                  <div class="invalid-feedback d-block">Debes aceptar las normas de la comunidad</div>
+                }
+              </div>
+            </div>
+            <div class="col-12">
+              <button class="btn btn-primary btn-lg w-100" type="submit">Crear cuenta</button>
+            </div>
+          </div>
+        </form>
+
+        <p class="text-center mt-4 mb-0">¿Ya tienes cuenta? <a routerLink="/login">Inicia sesión</a></p>
+      </div>
+    </div>
+  </div>
+</section>
