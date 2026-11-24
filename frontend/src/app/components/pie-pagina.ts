@@ -14,14 +14,11 @@ import { RouterLink } from '@angular/router';
           </div>
           <div class="col-12 col-md-6 text-md-end small">
             <a routerLink="/" class="me-3">Inicio</a>
-            <a routerLink="/registro" class="me-3">Únete</a>
-            <span class="text-white-50">© {{ anio }} Desarrollo Full Stack III</span>
+            <a routerLink="/registro">Únete</a>
           </div>
         </div>
       </div>
     </footer>
   `,
 })
-export class PiePagina {
-  protected readonly anio = new Date().getFullYear();
-}
+export class PiePagina {}
