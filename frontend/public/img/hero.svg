@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300" role="img" aria-label="Burbujas de diálogo">
+  <circle cx="200" cy="150" r="130" fill="#ffffff" opacity="0.08"/>
+  <g>
+    <rect x="40" y="60" width="190" height="90" rx="22" fill="#ffffff"/>
+    <path d="M80 150l-10 30 38-30z" fill="#ffffff"/>
+    <rect x="66" y="88" width="120" height="10" rx="5" fill="#0f5257"/>
+    <rect x="66" y="110" width="90" height="10" rx="5" fill="#9fc6c6"/>
+  </g>
+  <g>
+    <rect x="170" y="140" width="190" height="90" rx="22" fill="#f2a541"/>
+    <path d="M320 230l10 30-38-30z" fill="#f2a541"/>
+    <rect x="196" y="168" width="130" height="10" rx="5" fill="#0a3b3f"/>
+    <rect x="196" y="190" width="80" height="10" rx="5" fill="#0a3b3f" opacity="0.5"/>
+  </g>
+  <circle cx="300" cy="80" r="26" fill="#e3f1f1"/>
+  <circle cx="292" cy="76" r="4" fill="#0f5257"/><circle cx="308" cy="76" r="4" fill="#0f5257"/>
+  <path d="M290 88q10 8 20 0" stroke="#0f5257" stroke-width="3" fill="none" stroke-linecap="round"/>
+</svg>

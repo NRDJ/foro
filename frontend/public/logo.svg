@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Ágora">
+  <rect width="64" height="64" rx="14" fill="#0f5257"/>
+  <path d="M14 18h26a8 8 0 0 1 8 8v10a8 8 0 0 1-8 8H28l-9 7v-7h-5a8 8 0 0 1-8-8V26a8 8 0 0 1 8-8z" fill="#f2a541"/>
+  <path d="M27 38l5-16 5 16M29 33h6" stroke="#0f5257" stroke-width="3.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+  <circle cx="50" cy="14" r="5" fill="#e3f1f1"/>
+</svg>

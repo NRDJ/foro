@@ -1,0 +1,59 @@
+@if (noEncontrado()) {
+  <div class="text-center py-5">
+    <h1 class="h4">No puedes editar este tema</h1>
+    <p class="text-secondary">No existe o no eres su autor.</p>
+    <a routerLink="/" class="btn btn-primary">Volver al inicio</a>
+  </div>
+} @else {
+  <section class="row justify-content-center">
+    <div class="col-12 col-lg-9 col-xl-8">
+      <div class="card panel">
+        <div class="card-body p-4 p-md-5">
+          <h1 class="h3 mb-4">{{ id() ? 'Editar tema' : 'Publicar un tema' }}</h1>
+
+          @if (error()) {
+            <div class="alert alert-danger" role="alert">{{ error() }}</div>
+          }
+
+          <form [formGroup]="form" (ngSubmit)="guardar()" novalidate>
+            <div class="row g-3">
+              <div class="col-12 col-md-8">
+                <label for="titulo" class="form-label">Título</label>
+                <input id="titulo" class="form-control" formControlName="titulo" required minlength="5" maxlength="150"
+                       [class.is-invalid]="form.controls.titulo.invalid && form.controls.titulo.touched" />
+                <div class="d-flex">
+                  <app-error-campo [control]="form.controls.titulo" />
+                  <span class="form-text ms-auto">{{ form.controls.titulo.value?.length ?? 0 }}/150</span>
+                </div>
+              </div>
+              <div class="col-12 col-md-4">
+                <label for="categoria" class="form-label">Categoría</label>
+                <select id="categoria" class="form-select" formControlName="categoriaId" required
+                        [class.is-invalid]="form.controls.categoriaId.invalid && form.controls.categoriaId.touched">
+                  <option [ngValue]="null" disabled>Selecciona una</option>
+                  @for (c of foro.categorias; track c.id) {
+                    <option [ngValue]="c.id">{{ c.nombre }}</option>
+                  }
+                </select>
+                <app-error-campo [control]="form.controls.categoriaId" />
+              </div>
+              <div class="col-12">
+                <label for="contenido" class="form-label">Contenido</label>
+                <textarea id="contenido" class="form-control" rows="7" formControlName="contenido" required minlength="20" maxlength="1000"
+                          [class.is-invalid]="form.controls.contenido.invalid && form.controls.contenido.touched"></textarea>
+                <div class="d-flex">
+                  <app-error-campo [control]="form.controls.contenido" />
+                  <span class="form-text ms-auto">{{ form.controls.contenido.value?.length ?? 0 }}/1000</span>
+                </div>
+              </div>
+              <div class="col-12 d-flex flex-wrap gap-2">
+                <button class="btn btn-primary" type="submit"><i class="bi bi-check-lg"></i> {{ id() ? 'Guardar cambios' : 'Publicar' }}</button>
+                <a class="btn btn-outline-secondary" [routerLink]="id() ? ['/temas', id()] : ['/']">Cancelar</a>
+              </div>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </section>
+}
